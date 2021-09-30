@@ -26,8 +26,8 @@ internal class TestInput {
 
     @Test
     fun wrongInputFileName() {
-        parseArguments(arrayOf("-file= test1.txt"))
-        assertEquals("No such file or directory: ' test1.txt'", stream.toString().trim())
+        parseArguments(arrayOf("-fileIn", "test2.txt"))
+        assertEquals("No such file or directory: 'test2.txt'", stream.toString().trim())
     }
 
     @Nested
@@ -40,22 +40,28 @@ internal class TestInput {
         @Test
         fun defaultDataBaseTest() {
             val command = parseArguments(arrayOf())
-            assertTrue(command.shell)
+            assertTrue(command.readFromShell)
             assertEquals("junk.dbm", command.dataBaseFileName)
         }
 
         @Test
         fun dataBaseFromFileTest() {
             val command = parseArguments(arrayOf("test.dbm"))
-            assertTrue(command.shell)
+            assertTrue(command.readFromShell)
             assertEquals("test.dbm", command.dataBaseFileName)
         }
 
         @Test
         fun commandsFromFileTest() {
-            val command = parseArguments(arrayOf("-file=test1.txt"))
-            assertFalse(command.shell)
-            assertEquals("test1.txt", command.commandFileName)
+            val command = parseArguments(arrayOf("-fileIn", "test1.txt"))
+            assertFalse(command.readFromShell)
+        }
+
+        @Test
+        fun outToFileTest() {
+            val command = parseArguments(arrayOf("-fileOut", "test3.txt"))
+            assertFalse(command.writeToShell)
+            File("test3.txt").delete()
         }
 
         @Test
