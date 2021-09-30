@@ -1,10 +1,17 @@
 import java.io.File
 import java.io.IOException
-import java.lang.Thread.sleep
 import java.util.*
 
-class Shell(val defaultDataBaseName: String = "junk.dbm") {
+class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false) {
     data class Command(val operation: Operation, val arguments: List<String>)
+
+    enum class Color(var code: String) {
+        RESET("\u001B[0m"), RED("\u001B[31m"), GREEN("\u001B[32m"), BLUE("\u001B[34m"), PURPLE("\u001B[35m");
+
+        override fun toString(): String {
+            return this.code
+        }
+    }
 
     enum class Operation(val args: Int) {
         CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1);
@@ -17,6 +24,12 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
     var dataBase = DataBase(File(defaultDataBaseName))
     var exit = false
     var open = false
+
+    init {
+        if (!color) {
+            Color.values().forEach { it.code = "" }
+        }
+    }
 
     private fun quit() {
         exit = true
@@ -41,7 +54,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
             ""
         else
             " not"
-        return listOf("Database file: ${dataBase.file.name}", "Database is$state open")
+        return listOf("Database file: ${Color.PURPLE}${dataBase.file.name}${Color.RESET}", "Database is$state open")
     }
 
     fun readCommand(): Command {
@@ -67,15 +80,20 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
     }
 
     private fun printName() {
-        print("dbm> ")
+        print("${Color.BLUE}dbm> ${Color.RESET}")
     }
 
     private fun printList(list: List<String>) {
         list.forEach { println(it) }
     }
 
-    private fun println(message: String) {
-        kotlin.io.println(message)
+    fun println(message: String) {
+        kotlin.io.println("${Color.GREEN}$message${Color.RESET}")
+    }
+
+    fun printError(message: String?) {
+        if (message != null)
+            kotlin.io.println("${Color.RED}$message${Color.RESET}")
     }
 
     fun run(command: Command) {
@@ -101,7 +119,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
                     quit()
             }
         } catch (err: DataBaseException) {
-            System.err.println(err.message)
+            printError(err.message)
         }
     }
 
@@ -112,14 +130,13 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
 
 
 fun readFromShell(command: Utility) {
-    val shell = Shell(command.dataBaseFileName)
+    val shell = Shell(command.dataBaseFileName, command.color)
     while (!shell.exit) {
         try {
             val command = shell.readCommand()
             shell.run(command)
         } catch (err: IOException) {
-            System.err.println(err.message)
-            sleep(100)
+            shell.printError(err.message)
         }
     }
 }

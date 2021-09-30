@@ -9,10 +9,8 @@ typealias Operation = Shell.Operation
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ShellTest {
     private val testDataBase = File("test.dbm")
-    private val standardErr = System.err
     private val standardOut = System.out
     private val streamOut = ByteArrayOutputStream()
-    private val streamErr = ByteArrayOutputStream()
     val shell = Shell()
 
     private fun writeInput(data: String) {
@@ -22,7 +20,6 @@ internal class ShellTest {
     @BeforeAll
     fun setUp() {
         testDataBase.createNewFile()
-        System.setErr(PrintStream(streamErr))
         System.setOut(PrintStream(streamOut))
     }
 
@@ -30,7 +27,6 @@ internal class ShellTest {
     fun tearDown() {
         testDataBase.delete()
         shell.clear()
-        System.setErr(standardErr)
         System.setOut(standardOut)
     }
 
@@ -38,7 +34,6 @@ internal class ShellTest {
     inner class ReadCommandTest {
         @BeforeEach
         fun reset() {
-            streamErr.reset()
             streamOut.reset()
         }
 
@@ -70,7 +65,6 @@ internal class ShellTest {
         fun emptyInputTest() {
             shell.readCommand()
             assertEquals("dbm> ", streamOut.toString())
-            assertEquals("", streamErr.toString())
         }
 
         @Test
@@ -78,7 +72,6 @@ internal class ShellTest {
             writeInput("\n\n\n")
             shell.readCommand()
             assertEquals("dbm> dbm> dbm> dbm> ", streamOut.toString())
-            assertEquals("", streamErr.toString())
         }
 
         @Test
