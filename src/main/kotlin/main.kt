@@ -5,9 +5,8 @@ fun main(args: Array<String>) {
     when {
         command.exit ->
             exitProcess(0)
-        command.shell ->
-            readFromShell(command)
-        else ->
+        !command.shell ->
             readFromFile(command)
     }
+    readFromShell(command)
 }
