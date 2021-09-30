@@ -1,0 +1,8 @@
+open test.dbm
+store a b
+fetch a
+store b c
+fetch b
+close 1
+store c d
+status
