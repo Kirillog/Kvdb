@@ -2,7 +2,19 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 
+/**
+ * describes interaction between user and program,
+ * @property utility the program that shell wraps
+ * @property dataBase the current dataBase which user are working
+ * @property open reflects whether open [dataBase] or not
+ * @property exit true when user write quit command
+ */
+
 class Shell(val utility: Utility) {
+
+    /**
+     * stores [operation] to dataBase or Shell with [arguments]
+     */
     data class Command(val operation: Operation, val arguments: List<String>)
 
     enum class Operation(val args: Int) {
@@ -27,11 +39,16 @@ class Shell(val utility: Utility) {
 
     init {
         if (utility.writeToShell)
+        // merge err and out stream to avoid interrupts in output
             System.setErr(System.out)
         if (!utility.color)
+        // set print uncolored
             Color.values().forEach { it.code = "" }
     }
 
+    /**
+     * reads command from standard input and returns it
+     */
     fun readCommand(): Command {
         var line: String?
         do {
@@ -54,6 +71,10 @@ class Shell(val utility: Utility) {
         throw IOException("Unknown command -- '$stringOperation'")
     }
 
+    /**
+     * try to run [command] on database
+     * if error occurred catch DataBaseException and prints message
+     */
     fun run(command: Command) {
         try {
             when (command.operation) {
@@ -86,6 +107,11 @@ class Shell(val utility: Utility) {
         dataBase.close()
     }
 
+    /**
+     * closes opened dataBase and
+     * opens dataBase in [dataBaseName] file
+     */
+
     private fun open(dataBaseName: String) {
         if (open)
             close()
@@ -99,6 +125,11 @@ class Shell(val utility: Utility) {
         dataBase = DataBase(File(utility.dataBaseFileName))
         open = false
     }
+
+    /**
+     * returns status of database:
+     * name of file and opened file or not
+     */
 
     private fun status(): List<String> {
         val state = if (open)
