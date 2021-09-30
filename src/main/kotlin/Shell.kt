@@ -1,9 +1,8 @@
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
 
-class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false, val invitation: Boolean = true) {
+class Shell(val utility: Utility) {
     data class Command(val operation: Operation, val arguments: List<String>)
 
     enum class Operation(val args: Int) {
@@ -22,15 +21,15 @@ class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false
         }
     }
 
-    var dataBase = DataBase(File(defaultDataBaseName))
+    var dataBase = DataBase(File(utility.dataBaseFileName))
     var exit = false
     var open = false
 
     init {
-        System.setErr(System.out)
-        if (!color) {
+        if (utility.writeToShell)
+            System.setErr(System.out)
+        if (!utility.color)
             Color.values().forEach { it.code = "" }
-        }
     }
 
     fun readCommand(): Command {
@@ -84,6 +83,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false
 
     private fun quit() {
         exit = true
+        dataBase.close()
     }
 
     private fun open(dataBaseName: String) {
@@ -96,7 +96,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false
 
     private fun close() {
         dataBase.close()
-        dataBase = DataBase(File(this.defaultDataBaseName))
+        dataBase = DataBase(File(utility.dataBaseFileName))
         open = false
     }
 
@@ -109,7 +109,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false
     }
 
     private fun printName() {
-        if (invitation)
+        if (utility.readFromShell)
             print("${Color.BLUE}dbm> ${Color.RESET}")
     }
 
@@ -127,23 +127,6 @@ class Shell(val defaultDataBaseName: String = "junk.dbm", color: Boolean = false
     }
 
     fun clear() {
-        File(defaultDataBaseName).delete()
+        File(utility.dataBaseFileName).delete()
     }
-}
-
-
-fun readFromShell(command: Utility) {
-    val shell = Shell(command.dataBaseFileName, command.color, command.shell)
-    while (!shell.exit) {
-        try {
-            val command = shell.readCommand()
-            shell.run(command)
-        } catch (err: IOException) {
-            shell.printError(err.message)
-        }
-    }
-}
-
-fun readFromFile(command: Utility) {
-    System.setIn(FileInputStream(File(command.commandFileName)))
 }

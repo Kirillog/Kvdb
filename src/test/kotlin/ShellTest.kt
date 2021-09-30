@@ -11,7 +11,7 @@ internal class ShellTest {
     private val testDataBase = File("test.dbm")
     private val standardOut = System.out
     private val streamOut = ByteArrayOutputStream()
-    val shell = Shell()
+    val shell = Shell(Utility())
 
     private fun writeInput(data: String) {
         System.setIn(ByteArrayInputStream(data.toByteArray()))
@@ -125,7 +125,7 @@ internal class ShellTest {
         fun runCloseCommandTest() {
             shell.run(Command(Operation.OPEN, listOf("test.dbm")))
             shell.run(Command(Operation.CLOSE, listOf()))
-            assertEquals(shell.defaultDataBaseName, shell.dataBase.file.name)
+            assertEquals(shell.utility.dataBaseFileName, shell.dataBase.file.name)
             assertFalse(shell.open)
         }
 
