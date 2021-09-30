@@ -1,8 +1,15 @@
 import java.io.File
 import java.lang.Exception
 
+/**
+ * describes all database exceptions
+ */
 class DataBaseException(message: String) : Exception(message)
 
+/**
+ * describes database opened in [file]
+ * @param hashTable replies on queries to database
+ */
 class DataBase(val file: File) {
     private val hashTable = HashMap<String, String>()
 
@@ -11,6 +18,9 @@ class DataBase(val file: File) {
             file.createNewFile()
     }
 
+    /**
+     * read pairs (key, value) from file and storage to hashTable
+     */
     fun open() {
         file.useLines {
             it.forEach { line ->
@@ -38,6 +48,9 @@ class DataBase(val file: File) {
         return hashTable[key] ?: throw DataBaseException("No such item found")
     }
 
+    /**
+     * returns list of pairs (key, value) of dataBase
+     */
     fun list(): List<String> {
         val list = mutableListOf<String>()
         hashTable.forEach { (key, value) ->
@@ -50,6 +63,9 @@ class DataBase(val file: File) {
         hashTable.clear()
     }
 
+    /**
+     * rewrite all fields (key, value) to database file after changes
+     */
     fun close() {
         file.bufferedWriter().use { out ->
             hashTable.forEach { (key, value) ->
