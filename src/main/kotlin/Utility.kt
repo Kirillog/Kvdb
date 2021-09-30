@@ -11,38 +11,43 @@ data class Utility(
     var exit: Boolean = false,
 )
 
+/**
+ * parse program arguments from [args]
+ * @return data class Utility that stores options and database file name
+ */
+
 fun parseArguments(args: Array<String>): Utility {
-    val command = Utility()
+    val utility = Utility()
     var inputFileName = ""
     var outputFileName = ""
     try {
         args.forEach { argument ->
             when {
                 argument == "-fileIn" ->
-                    command.readFromShell = false
-                !command.readFromShell && inputFileName == "" ->
+                    utility.readFromShell = false
+                !utility.readFromShell && inputFileName == "" ->
                     inputFileName = argument
                 argument == "-fileOut" ->
-                    command.writeToShell = false
-                !command.writeToShell && outputFileName == "" ->
+                    utility.writeToShell = false
+                !utility.writeToShell && outputFileName == "" ->
                     outputFileName = argument
                 argument == "-color" ->
-                    command.color = true
+                    utility.color = true
                 !argument.startsWith("-") ->
-                    command.dataBaseFileName = argument
+                    utility.dataBaseFileName = argument
                 else ->
                     throw IOException("Invalid option -- $argument")
             }
         }
-        if (!command.readFromShell && !File(inputFileName).isFile)
+        if (!utility.readFromShell && !File(inputFileName).isFile)
             throw IOException("No such file or directory: '$inputFileName'")
-        if (!command.readFromShell)
+        if (!utility.readFromShell)
             System.setIn(FileInputStream(File(inputFileName)))
-        if (!command.writeToShell)
+        if (!utility.writeToShell)
             System.setOut(PrintStream(File(outputFileName)))
     } catch (error: IOException) {
         System.err.println(error.message)
-        command.exit = true
+        utility.exit = true
     }
-    return command
+    return utility
 }
