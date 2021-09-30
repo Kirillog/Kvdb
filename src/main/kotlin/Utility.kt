@@ -26,14 +26,8 @@ fun parseArguments(args: Array<String>): Utility {
                     throw IOException("Invalid option -- $argument")
             }
         }
-        when {
-            !command.shell && !File(command.commandFileName).isFile ->
-                throw IOException("No such file or directory: '${command.commandFileName}'")
-            command.dataBaseFileName == "junk.dbm" ->
-                File(command.dataBaseFileName).createNewFile()
-            !File(command.dataBaseFileName).isFile ->
-                throw IOException("No such file or directory: '${command.dataBaseFileName}'")
-        }
+        if (!command.shell && !File(command.commandFileName).isFile)
+            throw IOException("No such file or directory: '${command.commandFileName}'")
     } catch (error: IOException) {
         System.err.println(error.message)
         command.exit = true

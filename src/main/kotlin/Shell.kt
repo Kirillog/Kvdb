@@ -23,11 +23,15 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
     }
 
     private fun open(dataBaseName: String) {
+        if (open)
+            close()
         dataBase = DataBase(File(dataBaseName))
+        dataBase.open()
         open = true
     }
 
     private fun close() {
+        dataBase.close()
         dataBase = DataBase(File(this.defaultDataBaseName))
         open = false
     }

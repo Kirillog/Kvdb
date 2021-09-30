@@ -24,24 +24,10 @@ internal class TestInput {
         testDataBase.delete()
     }
 
-    @Nested
-    inner class NamesOfFilesTest {
-        @BeforeEach
-        fun reset() {
-            stream.reset()
-        }
-
-        @Test
-        fun wrongDataBaseName() {
-            parseArguments(arrayOf("junk.gdbm"))
-            assertEquals("No such file or directory: 'junk.gdbm'", stream.toString().trim())
-        }
-
-        @Test
-        fun wrongInputFileName() {
-            parseArguments(arrayOf("-file= test1.txt"))
-            assertEquals("No such file or directory: ' test1.txt'", stream.toString().trim())
-        }
+    @Test
+    fun wrongInputFileName() {
+        parseArguments(arrayOf("-file= test1.txt"))
+        assertEquals("No such file or directory: ' test1.txt'", stream.toString().trim())
     }
 
     @Nested
