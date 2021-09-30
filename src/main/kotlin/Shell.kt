@@ -7,7 +7,7 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
     data class Command(val operation: Operation, val arguments: List<String>)
 
     enum class Operation(val args: Int) {
-        CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0);
+        CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1);
 
         override fun toString(): String {
             return this.name.lowercase(Locale.getDefault())
@@ -95,6 +95,8 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
                     println(dataBase.fetch(command.arguments.first()))
                 Operation.LIST ->
                     printList(dataBase.list())
+                Operation.CONTAINS ->
+                    println(dataBase.contains(command.arguments.first()).toString())
                 Operation.QUIT ->
                     quit()
             }
@@ -102,7 +104,8 @@ class Shell(val defaultDataBaseName: String = "junk.dbm") {
             System.err.println(err.message)
         }
     }
-    fun clear(){
+
+    fun clear() {
         File(defaultDataBaseName).delete()
     }
 }

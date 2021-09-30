@@ -20,6 +20,10 @@ class DataBase(val file: File) {
         }
     }
 
+    fun contains(key: String): Boolean {
+        return key in hashTable
+    }
+
     fun store(key: String, value: String) {
         hashTable[key] = value
     }
@@ -40,6 +44,10 @@ class DataBase(val file: File) {
             list.add("$key $value")
         }
         return list
+    }
+
+    fun clear() {
+        hashTable.clear()
     }
 
     fun close() {
