@@ -50,7 +50,9 @@ If the <ins>KEY</ins> already exists, its data will be replaced.
 - **list** <br> list the contents of the database
 - **status** <br> print current program status
 - **remove** <ins>FILE</ins> <br> remove database in <ins>FILE</ins>
----
+
+Note that if <ins>KEY</ins> or <ins>VALUE</ins> contains spaces, strings should be escaped by `""`.
+For example, `store "key 1" "value 1"`
 
 ## Output
 
@@ -58,7 +60,7 @@ In runtime for each command print the result of command. For example, for ```sta
 
 ```
 Database file: junk.gdbm
-Database is open
+Database is not open
 ```
 
 After `close` command stores all changes to the database file.

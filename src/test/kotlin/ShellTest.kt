@@ -56,6 +56,31 @@ internal class ShellTest {
         }
 
         @Test
+        fun storeKeyWithSpace() {
+            writeInput("store \"key 1\" value")
+            assertEquals(Command(Operation.STORE, listOf("key 1", "value")), shell.readCommand())
+        }
+
+        @Test
+        fun storeValueWithSpaceTest() {
+            writeInput("store key \"value 1\"")
+            assertEquals(Command(Operation.STORE, listOf("key", "value 1")), shell.readCommand())
+        }
+
+        @Test
+        fun storeKeyAndValueWithSpaceTest() {
+            writeInput("store \"key 1\" \"value 1\"")
+            assertEquals(Command(Operation.STORE, listOf("key 1", "value 1")), shell.readCommand())
+        }
+
+        @Test
+        fun fetchEmptyKeyTest() {
+            writeInput("fetch \"\"")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for fetch", exception.message)
+        }
+
+        @Test
         fun deleteCommandTest() {
             writeInput("delete key")
             assertEquals(Command(Operation.DELETE, listOf("key")), shell.readCommand())

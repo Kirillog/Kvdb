@@ -1,6 +1,7 @@
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.text.StringBuilder
 
 /**
  * describes interaction between user and program,
@@ -39,14 +40,49 @@ class Shell(val utility: Utility) {
     var open = false
 
     init {
-        if (utility.dataBaseFileName != defaultFile.name)
-            open(utility.dataBaseFileName)
         if (utility.writeToShell)
         // merge err and out stream to avoid interrupts in output
             System.setErr(System.out)
         if (!utility.color || !utility.writeToShell)
         // set print uncolored
             Color.values().forEach { it.code = "" }
+        try {
+            if (utility.dataBaseFileName != defaultFile.name)
+                open(utility.dataBaseFileName)
+        } catch (err: DataBaseException) {
+            printError(err.message)
+        }
+
+    }
+
+    private fun addToArgs(argument: StringBuilder, arguments: MutableList<String>) {
+        if (argument.isNotEmpty())
+            arguments.add(argument.toString())
+        argument.clear()
+    }
+
+    fun split(line: String): List<String> {
+        val argument = StringBuilder()
+        val arguments = mutableListOf<String>()
+        var openQuote = false
+        line.forEach { char ->
+            when {
+                char == '"' && openQuote -> {
+                    addToArgs(argument, arguments)
+                    openQuote = false
+                }
+                char == '"' && !openQuote ->
+                    openQuote = true
+                char != '"' && openQuote ->
+                    argument.append(char)
+                char == ' ' && !openQuote ->
+                    addToArgs(argument, arguments)
+                char != '"' && !openQuote ->
+                    argument.append(char)
+            }
+        }
+        addToArgs(argument, arguments)
+        return arguments
     }
 
     /**
@@ -59,10 +95,12 @@ class Shell(val utility: Utility) {
             line = readLine()?.trim()
         } while (line == "")
 
-        var arguments = line?.split(" ") ?: return Command(Operation.QUIT, listOf())
-        val stringOperation = arguments[0]
-        arguments = arguments.subList(1, arguments.size)
-
+        val lineArguments = line?.split(" ", limit = 2) ?: return Command(Operation.QUIT, listOf())
+        val stringOperation = lineArguments[0]
+        val arguments = if (lineArguments.size == 2)
+            split(lineArguments[1])
+        else
+            listOf()
         Operation.values().forEach { operation ->
             if (operation.toString() == stringOperation) {
                 if (operation.args == arguments.size)
@@ -127,11 +165,11 @@ class Shell(val utility: Utility) {
 
     private fun close() {
         dataBase.close()
-        dataBase = DataBase(File(utility.dataBaseFileName))
+        dataBase = DataBase(defaultFile)
         open = false
     }
 
-    private fun remove(fileName : String) {
+    private fun remove(fileName: String) {
         if (fileName == dataBase.file.name) {
             open = false
             dataBase = DataBase(defaultFile)
