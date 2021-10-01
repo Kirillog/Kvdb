@@ -26,7 +26,7 @@ class DataBase(val file: File) {
         file.useLines {
             it.forEach { line ->
                 try {
-                    val (key, value) = line.split(" ")
+                    val (key, value) = line.split("->")
                     hashTable[key] = value
                 }
                 catch (err : IndexOutOfBoundsException) {
@@ -60,7 +60,7 @@ class DataBase(val file: File) {
     fun list(): List<String> {
         val list = mutableListOf<String>()
         hashTable.forEach { (key, value) ->
-            list.add("$key $value")
+            list.add("$key->$value")
         }
         return list
     }
@@ -75,7 +75,7 @@ class DataBase(val file: File) {
     fun close() {
         file.bufferedWriter().use { out ->
             hashTable.forEach { (key, value) ->
-                out.write("$key $value\n")
+                out.write("$key->$value\n")
             }
         }
         if (hashTable.isEmpty())

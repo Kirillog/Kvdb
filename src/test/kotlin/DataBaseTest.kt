@@ -88,8 +88,8 @@ internal class DataBaseTest {
             dataBase.close()
             assertEqual(
                 """
-                key value
-                key2 value2
+                key->value
+                key2->value2
                 """.trimIndent().split("\n"), File("test.dbm").readText().trimIndent().split("\n")
             )
         }
