@@ -1,5 +1,6 @@
 import java.io.File
 import java.lang.Exception
+import java.lang.IndexOutOfBoundsException
 
 /**
  * describes all database exceptions
@@ -24,8 +25,13 @@ class DataBase(val file: File) {
     fun open() {
         file.useLines {
             it.forEach { line ->
-                val (key, value) = line.split(" ")
-                hashTable[key] = value
+                try {
+                    val (key, value) = line.split(" ")
+                    hashTable[key] = value
+                }
+                catch (err : IndexOutOfBoundsException) {
+                    throw DataBaseException("Cannot open ${file.name}")
+                }
             }
         }
     }
