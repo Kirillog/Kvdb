@@ -62,10 +62,28 @@ internal class DataBaseTest {
         }
 
         @Test
+        fun deleteNotExistingKeyTest() {
+            val exception = assertThrows<DataBaseException> { dataBase.delete("key") }
+            assertEquals("Item 'key' not found", exception.message)
+        }
+
+        @Test
+        fun openNotDataBaseTest() {
+            val file = File("test1.dbm")
+            file.bufferedWriter().use { out ->
+                out.write("key:value\n")
+            }
+            val dataBase1 = DataBase(file)
+            val exception = assertThrows<DataBaseException> { dataBase1.open() }
+            assertEquals("Cannot open 'test1.dbm'", exception.message)
+            file.delete()
+        }
+
+        @Test
         fun listTest() {
             dataBase.store("key1", "value1")
             dataBase.store("key2", "value2")
-            assertContentEquals(listOf("key1 value1", "key2 value2"), dataBase.list())
+            assertContentEquals(listOf("key1->value1", "key2->value2"), dataBase.list())
         }
 
     }
@@ -76,7 +94,7 @@ internal class DataBaseTest {
         fun openTest() {
             val dataBase1 = DataBase(File("src/test/files/openTestFile.dbm"))
             dataBase1.open()
-            assertContentEquals(listOf("key1 value1", "key3 value3"), dataBase1.list())
+            assertContentEquals(listOf("key1->value1", "key3->value3"), dataBase1.list())
         }
 
         @Test

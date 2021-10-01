@@ -30,7 +30,7 @@ class DataBase(val file: File) {
                     hashTable[key] = value
                 }
                 catch (err : IndexOutOfBoundsException) {
-                    throw DataBaseException("Cannot open ${file.name}")
+                    throw DataBaseException("Cannot open '${file.name}'")
                 }
             }
         }
@@ -46,7 +46,7 @@ class DataBase(val file: File) {
 
     fun delete(key: String) {
         if (key !in hashTable)
-            throw DataBaseException("Item not found")
+            throw DataBaseException("Item '$key' not found")
         hashTable.remove(key)
     }
 
