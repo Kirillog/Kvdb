@@ -18,7 +18,7 @@ class Shell(val utility: Utility) {
     data class Command(val operation: Operation, val arguments: List<String>)
 
     enum class Operation(val args: Int) {
-        CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1);
+        CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1), REMOVE(1);
 
         override fun toString(): String {
             return this.name.lowercase(Locale.getDefault())
@@ -33,15 +33,18 @@ class Shell(val utility: Utility) {
         }
     }
 
-    var dataBase = DataBase(File(utility.dataBaseFileName))
+    val defaultFile = File("junk.dbm")
+    var dataBase = DataBase(defaultFile)
     var exit = false
     var open = false
 
     init {
+        if (utility.dataBaseFileName != defaultFile.name)
+            open(utility.dataBaseFileName)
         if (utility.writeToShell)
         // merge err and out stream to avoid interrupts in output
             System.setErr(System.out)
-        if (!utility.color)
+        if (!utility.color || !utility.writeToShell)
         // set print uncolored
             Color.values().forEach { it.code = "" }
     }
@@ -82,6 +85,8 @@ class Shell(val utility: Utility) {
                     open(command.arguments.first())
                 Operation.CLOSE ->
                     close()
+                Operation.REMOVE ->
+                    remove(command.arguments.first())
                 Operation.STATUS ->
                     printList(status())
                 Operation.STORE ->
@@ -124,6 +129,14 @@ class Shell(val utility: Utility) {
         dataBase.close()
         dataBase = DataBase(File(utility.dataBaseFileName))
         open = false
+    }
+
+    private fun remove(fileName : String) {
+        if (fileName == dataBase.file.name) {
+            open = false
+            dataBase = DataBase(defaultFile)
+        }
+        File(fileName).delete()
     }
 
     /**

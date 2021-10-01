@@ -140,5 +140,13 @@ internal class ShellTest {
                 """.trimIndent(), streamOut.toString().trimIndent()
             )
         }
+
+        @Test
+        fun runRemoveCommandTest() {
+            File("test1.dbm").createNewFile()
+            shell.run(Command(Operation.REMOVE, listOf("test1.dbm")))
+            assertEquals(shell.dataBase.file.name, "junk.dbm")
+            assertFalse(shell.open)
+        }
     }
 }

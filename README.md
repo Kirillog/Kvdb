@@ -49,6 +49,7 @@ If the <ins>KEY</ins> already exists, its data will be replaced.
 - **delete** <ins>KEY</ins> <br> delete record with the given <ins>KEY<ins>
 - **list** <br> list the contents of the database
 - **status** <br> print current program status
+- **remove** <ins>FILE</ins> <br> remove database in <ins>FILE</ins>
 ---
 
 ## Output
