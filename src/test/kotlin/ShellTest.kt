@@ -3,9 +3,6 @@ import org.junit.jupiter.api.Test
 import java.io.*
 import kotlin.test.*
 
-typealias Command = Shell.Command
-typealias Operation = Shell.Operation
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ShellTest {
     private val testDataBase = File("test.dbm")
@@ -77,7 +74,7 @@ internal class ShellTest {
         fun fetchEmptyKeyTest() {
             writeInput("fetch \"\"")
             val exception = assertThrows<IOException> { shell.readCommand() }
-            assertEquals("Incorrect number of arguments for fetch", exception.message)
+            assertEquals("Cannot interpreter the empty strings", exception.message)
         }
 
         @Test
@@ -100,10 +97,52 @@ internal class ShellTest {
         }
 
         @Test
-        fun missingOperandTest() {
+        fun missingOperandFetchTest() {
             writeInput("fetch")
             val exception = assertThrows<IOException> { shell.readCommand() }
             assertEquals("Incorrect number of arguments for fetch", exception.message)
+        }
+
+        @Test
+        fun missingOperandOpenTest() {
+            writeInput("open")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for open", exception.message)
+        }
+
+        @Test
+        fun missingOperandDeleteTest() {
+            writeInput("delete")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for delete", exception.message)
+        }
+
+        @Test
+        fun missingOperandContainsTest() {
+            writeInput("contains")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for contains", exception.message)
+        }
+
+        @Test
+        fun missingOperandRemoveTest() {
+            writeInput("remove")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for remove", exception.message)
+        }
+
+        @Test
+        fun missingOperandStoreTest() {
+            writeInput("store key")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for store", exception.message)
+        }
+
+        @Test
+        fun missingOperandsStoreTest() {
+            writeInput("store")
+            val exception = assertThrows<IOException> { shell.readCommand() }
+            assertEquals("Incorrect number of arguments for store", exception.message)
         }
 
         @Test
@@ -172,6 +211,12 @@ internal class ShellTest {
             shell.run(Command(Operation.REMOVE, listOf("test1.dbm")))
             assertEquals(shell.dataBase.file.name, "junk.dbm")
             assertFalse(shell.open)
+        }
+
+        @Test
+        fun runRemoveCommandForNonExistingDataBase(){
+            val exception = assertThrows<IOException> { shell.run(Command(Operation.REMOVE, listOf("test1.dbm"))) }
+            assertEquals("There is no database with name 'test1.dbm'", exception.message)
         }
     }
 }
