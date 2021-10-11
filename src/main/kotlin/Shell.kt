@@ -13,28 +13,7 @@ import kotlin.text.StringBuilder
 
 class Shell(val utility: Utility) {
 
-    /**
-     * stores [operation] to dataBase or Shell with [arguments]
-     */
-    data class Command(val operation: Operation, val arguments: List<String>)
-
-    enum class Operation(val args: Int) {
-        CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1), REMOVE(1);
-
-        override fun toString(): String {
-            return this.name.lowercase(Locale.getDefault())
-        }
-    }
-
-    enum class Color(var code: String) {
-        RESET("\u001B[0m"), RED("\u001B[31m"), GREEN("\u001B[32m"), BLUE("\u001B[34m"), PURPLE("\u001B[35m");
-
-        override fun toString(): String {
-            return this.code
-        }
-    }
-
-    val defaultFile = File("junk.dbm")
+    val defaultFile = File(standardFileName)
     var dataBase = DataBase(defaultFile)
     var exit = false
     var open = false
@@ -55,11 +34,20 @@ class Shell(val utility: Utility) {
 
     }
 
+    /**
+     * adding [argument] to [arguments] if [argument] not empty
+     */
+
     private fun addToArgs(argument: StringBuilder, arguments: MutableList<String>) {
         if (argument.isNotEmpty())
             arguments.add(argument.toString())
         argument.clear()
     }
+
+    /**
+     * split [line] of arguments to list of these arguments,
+     * where each argument can be escaped by quotes
+     */
 
     fun split(line: String): List<String> {
         val argument = StringBuilder()
@@ -67,17 +55,17 @@ class Shell(val utility: Utility) {
         var openQuote = false
         line.forEach { char ->
             when {
-                char == '"' && openQuote -> {
+                openQuote && char == '"' -> {
+                    if (argument.isEmpty())
+                        throw IOException("Cannot interpreter the empty strings")
                     addToArgs(argument, arguments)
                     openQuote = false
                 }
-                char == '"' && !openQuote ->
+                char == '"' ->
                     openQuote = true
-                char != '"' && openQuote ->
-                    argument.append(char)
                 char == ' ' && !openQuote ->
                     addToArgs(argument, arguments)
-                char != '"' && !openQuote ->
+                else ->
                     argument.append(char)
             }
         }
@@ -88,28 +76,30 @@ class Shell(val utility: Utility) {
     /**
      * reads command from standard input and returns it
      */
+
     fun readCommand(): Command {
         var line: String?
         do {
             printName()
             line = readLine()?.trim()
         } while (line == "")
-
+        // split "operation args" to listOf("operation", "args") if line isn't null
         val lineArguments = line?.split(" ", limit = 2) ?: return Command(Operation.QUIT, listOf())
         val stringOperation = lineArguments[0]
+        // if command has at least one argument, split "args" to args
         val arguments = if (lineArguments.size == 2)
             split(lineArguments[1])
         else
             listOf()
-        Operation.values().forEach { operation ->
-            if (operation.toString() == stringOperation) {
-                if (operation.args == arguments.size)
-                    return Command(operation, arguments)
-                else
-                    throw IOException("Incorrect number of arguments for $stringOperation")
-            }
+        // check if operation is available and has correct number of arguments
+        try {
+            val operation = Operation.valueOf(stringOperation.uppercase())
+            if (arguments.size != operation.args)
+                throw IOException("Incorrect number of arguments for $stringOperation")
+            return Command(operation, arguments)
+        } catch (exc: IllegalArgumentException) {
+            throw IOException("Unknown command -- '$stringOperation'")
         }
-        throw IOException("Unknown command -- '$stringOperation'")
     }
 
     /**
@@ -174,7 +164,10 @@ class Shell(val utility: Utility) {
             open = false
             dataBase = DataBase(defaultFile)
         }
-        File(fileName).delete()
+        if (File(fileName).isFile) {
+            File(fileName).delete()
+        } else
+            throw IOException("There is no database with name '$fileName'")
     }
 
     /**
@@ -210,5 +203,22 @@ class Shell(val utility: Utility) {
 
     fun clear() {
         File(utility.dataBaseFileName).delete()
+    }
+}
+
+/**
+ * stores [operation] to dataBase or Shell with [arguments]
+ */
+data class Command(val operation: Operation, val arguments: List<String>)
+
+enum class Operation(val args: Int) {
+    CLOSE(0), STATUS(0), QUIT(0), OPEN(1), STORE(2), DELETE(1), FETCH(1), LIST(0), CONTAINS(1), REMOVE(1);
+}
+
+enum class Color(var code: String) {
+    RESET("\u001B[0m"), RED("\u001B[31m"), GREEN("\u001B[32m"), BLUE("\u001B[34m"), PURPLE("\u001B[35m");
+
+    override fun toString(): String {
+        return this.code
     }
 }

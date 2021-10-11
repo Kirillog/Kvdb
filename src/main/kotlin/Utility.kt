@@ -3,8 +3,10 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.PrintStream
 
+const val standardFileName = "junk.dbm"
+
 data class Utility(
-    var dataBaseFileName: String = "junk.dbm",
+    var dataBaseFileName: String = standardFileName,
     var color: Boolean = false,
     var readFromShell: Boolean = true,
     var writeToShell: Boolean = true,
